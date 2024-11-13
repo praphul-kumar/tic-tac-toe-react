@@ -5,7 +5,12 @@ import Log from "./components/Log";
 import { WINNING_COMBINATIONS } from "./winning-combinations";
 import GameOver from "./components/GameOver";
 
-const initialGameBoard = [
+const PLAYERS = {
+  X: "Player 1",
+  O: "Player 2",
+};
+
+const INITIAL_GAME_BOARD = [
   [null, null, null],
   [null, null, null],
   [null, null, null],
@@ -20,44 +25,54 @@ function deriveActivePlayer(gameTurns) {
   return activePlayer;
 }
 
-function App() {
-  const [players, setPlayers] = useState({
-    X: 'Player 1',
-    O: 'Player 2'
-  });
-
-  const [gameTurns, setGameTurns] = useState([]);
-  const activePlayer = deriveActivePlayer(gameTurns);
-
-  // Getting a Deep copy of the initialBoard to prevent the memory reference problem of javascript and always get a fresh copy of the initaial gameboard
-  let gameBoard = [...initialGameBoard.map(array => [...array])];
-
-  for (const turn of gameTurns) {
-    const {square, player} = turn;
-    const {row, col} = square;
-
-    gameBoard[row][col] = player;
-  }
-
-  // Check for winner
+function deriveWinner(players, gameBoard) {
   let winner = null;
   for (const combinations of WINNING_COMBINATIONS) {
-    const firstSquareSymbol = gameBoard[combinations[0].row][combinations[0].column];
-    const secondSquareSymbol = gameBoard[combinations[1].row][combinations[1].column];
-    const thirdSquareSymbol = gameBoard[combinations[2].row][combinations[2].column];
+    const firstSquareSymbol =
+      gameBoard[combinations[0].row][combinations[0].column];
+    const secondSquareSymbol =
+      gameBoard[combinations[1].row][combinations[1].column];
+    const thirdSquareSymbol =
+      gameBoard[combinations[2].row][combinations[2].column];
 
-    if (firstSquareSymbol && firstSquareSymbol === secondSquareSymbol && firstSquareSymbol === thirdSquareSymbol) {
+    if (
+      firstSquareSymbol &&
+      firstSquareSymbol === secondSquareSymbol &&
+      firstSquareSymbol === thirdSquareSymbol
+    ) {
       winner = players[firstSquareSymbol];
 
       break;
     }
   }
 
-  let hasDraw = false;
-  if (gameTurns.length === 9 && !winner) {
-    hasDraw = true;
+  return winner;
+}
+
+function deriveGameBoard(gameTurns) {
+  // Getting a Deep copy of the initialBoard to prevent the memory reference problem of javascript and always get a fresh copy of the initaial gameboard
+  let gameBoard = [...INITIAL_GAME_BOARD.map((array) => [...array])];
+
+  for (const turn of gameTurns) {
+    const { square, player } = turn;
+    const { row, col } = square;
+
+    gameBoard[row][col] = player;
   }
 
+  return gameBoard;
+}
+
+function App() {
+  const [players, setPlayers] = useState(PLAYERS);
+
+  const [gameTurns, setGameTurns] = useState([]);
+  const activePlayer = deriveActivePlayer(gameTurns);
+  const gameBoard = deriveGameBoard(gameTurns);
+
+  // Check for winner & Draw
+  const winner = deriveWinner(players, gameBoard);
+  const hasDraw = gameTurns.length === 9 && !winner;
 
   function handleSelectSquare(row, col) {
     setGameTurns((prevTurns) => {
@@ -80,12 +95,12 @@ function App() {
   }
 
   function handlePlayerNameChange(symbol, newName) {
-    setPlayers(prevPlayers => {
+    setPlayers((prevPlayers) => {
       return {
         ...prevPlayers,
-        [symbol]: newName
-      }
-    })
+        [symbol]: newName,
+      };
+    });
   }
 
   return (
@@ -93,12 +108,24 @@ function App() {
       <div id="game-container">
         {/* Players */}
         <ol id="players" className="highlight-player">
-          <Player name="Player 1" symbol="X" isActive={activePlayer === "X"} onNameChange={handlePlayerNameChange}/>
-          <Player name="Player 2" symbol="O" isActive={activePlayer === "O"} onNameChange={handlePlayerNameChange}/>
+          <Player
+            name={players.X}
+            symbol="X"
+            isActive={activePlayer === "X"}
+            onNameChange={handlePlayerNameChange}
+          />
+          <Player
+            name={players.O}
+            symbol="O"
+            isActive={activePlayer === "O"}
+            onNameChange={handlePlayerNameChange}
+          />
         </ol>
 
         {/* Game Board */}
-        {(winner || hasDraw) && <GameOver winner={winner} handleRestart={handleRestart}/>}
+        {(winner || hasDraw) && (
+          <GameOver winner={winner} handleRestart={handleRestart} />
+        )}
         <GameBoard board={gameBoard} onSelectSquare={handleSelectSquare} />
       </div>
 
