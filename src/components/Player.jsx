@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export default function Player({ name, symbol, isActive }) {
+export default function Player({ name, symbol, isActive, onNameChange }) {
   const [isEditing, setIsEditing] = useState(false);
   const [playerName, setPlayerName] = useState(name);
 
@@ -10,6 +10,10 @@ export default function Player({ name, symbol, isActive }) {
 
   function handleEditClick() {
     setIsEditing((prev) => !prev);
+
+    if (isEditing) {
+      onNameChange(symbol, playerName);
+    }
   }
 
   let btnContent = "Edit";
