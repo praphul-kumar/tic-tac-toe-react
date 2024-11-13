@@ -24,7 +24,8 @@ function App() {
   const [gameTurns, setGameTurns] = useState([]);
   const activePlayer = deriveActivePlayer(gameTurns);
 
-  let gameBoard = initialGameBoard;
+  // Getting a Deep copy of the initialBoard to prevent the memory reference problem of javascript and always get a fresh copy of the initaial gameboard
+  let gameBoard = [...initialGameBoard.map(array => [...array])];
 
   for (const turn of gameTurns) {
     const {square, player} = turn;
@@ -69,6 +70,10 @@ function App() {
     });
   }
 
+  function handleRestart() {
+    setGameTurns([]);
+  }
+
   return (
     <main>
       <div id="game-container">
@@ -79,7 +84,7 @@ function App() {
         </ol>
 
         {/* Game Board */}
-        {(winner || hasDraw) && <GameOver winner={winner} />}
+        {(winner || hasDraw) && <GameOver winner={winner} handleRestart={handleRestart}/>}
         <GameBoard board={gameBoard} onSelectSquare={handleSelectSquare} />
       </div>
 
