@@ -19,7 +19,7 @@ export default function Home() {
         </div>
 
         <h2 className="game-item-title">Online Multiplayer</h2>
-        <Link to="online-multiplayer" className="game-link">Play Now</Link>
+        <Link to="om-start" className="game-link">Play Now</Link>
       </div>
     </div>
   )

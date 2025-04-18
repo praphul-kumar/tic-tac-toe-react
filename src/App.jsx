@@ -4,6 +4,7 @@ import Layout from "./pages/Layout";
 import Home from "./pages/Home";
 import LocalMultiplayer from "./pages/LocalMultiplayer";
 import OnlineMultiplayer from "./pages/OnlineMultiplayer";
+import OMStartScreen from "./pages/OMStartScreen";
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />
           <Route path='local-multiplayer' element={<LocalMultiplayer />} />
+          <Route path='om-start' element={<OMStartScreen />} />
           <Route path='online-multiplayer' element={<OnlineMultiplayer />} />
         </Route>
       </Routes>

@@ -1,10 +1,15 @@
 import { useEffect, useState, useRef } from "react";
 import { io } from "socket.io-client";
+import { useLocation } from "react-router-dom";
 import GameBoard from "../components/GameBoard";
 import Player from "../components/Player";
 import Log from "../components/Log";
 import GameOver from "../components/GameOver";
-import { deriveActivePlayer, deriveGameBoard, deriveWinner } from '../utils/gameLogic';
+import {
+  deriveActivePlayer,
+  deriveGameBoard,
+  deriveWinner,
+} from "../utils/gameLogic";
 
 import { LOCAL_PLAYERS } from "../config/constants";
 
@@ -12,8 +17,12 @@ import { LOCAL_PLAYERS } from "../config/constants";
 const socket = io("http://localhost:3000");
 
 export default function OnlineMultiplayer() {
+  const location = useLocation();
+  const { action, roomId: passedRoomId, name } = location.state || {};
+
   const [players, setPlayers] = useState(LOCAL_PLAYERS);
   const [winner, setWinner] = useState(null);
+  const [gametag, setGametag] = useState("");
   const [symbol, setSymbol] = useState("");
   const [gameTurns, setGameTurns] = useState([]);
   const [roomId, setRoomId] = useState("");
@@ -34,31 +43,33 @@ export default function OnlineMultiplayer() {
   const hasDraw = gameTurns.length === 9 && !finalWinner;
 
   useEffect(() => {
-    // Create or join room
-    const id = prompt("Enter room ID (or leave empty to create new):");
-
-    if (id) {
-      socket.emit("joinRoom", { roomId: id }, (response) => {
+    if (action === "create") {
+      socket.emit("createRoom", { name: name }, ({ roomId, symbol, gametag }) => {
+        setRoomId(roomId);
+        // setPlayers(players);
+        setGametag(gametag);
+        setSymbol(symbol);
+        setMessage("Waiting for opponent to join...");
+      });
+    } else if (action === "join") {
+      socket.emit("joinRoom", { roomId: passedRoomId, name: name }, (response) => {
         if (response.error) {
           alert(response.error);
         } else {
-          setRoomId(id);
-          setSymbol("O");
-          setJoined(true);
+          setRoomId(response.roomId);
+          setGametag(response.gametag);
+          // setPlayers(response.players);
+          setSymbol(response.symbol);
+          setJoined(response.success);
         }
-      });
-    } else {
-      socket.emit("createRoom", ({ roomId }) => {
-        setRoomId(roomId);
-        setSymbol("X");
-        setMessage("Waiting for opponent to join...");
       });
     }
 
     // Opponent joined
-    socket.on("startGame", () => {
-      setJoined(true);
+    socket.on("startGame", ({ players }) => {
+      setPlayers(players);
       setMessage("Game started!");
+      setJoined(true);
     });
 
     // Opponent move
@@ -80,7 +91,7 @@ export default function OnlineMultiplayer() {
 
     // Restart Game
     socket.on("restartGame", () => {
-      console.log('Setting winner to null');
+      console.log("Setting winner to null");
       setWinner(null);
       setGameTurns([]);
     });
@@ -92,9 +103,9 @@ export default function OnlineMultiplayer() {
       console.log(`Player: ${players[symbolRef.current]}`);
       setWinner(players[symbolRef.current]);
 
-      if (symbolRef.current == 'O') {
-        console.log('CHanging the Host Player...');
-        setSymbol('X');
+      if (symbolRef.current == "O") {
+        console.log("CHanging the Host Player...");
+        setSymbol("X");
       }
     });
 
@@ -107,7 +118,8 @@ export default function OnlineMultiplayer() {
   }, []);
 
   function handleSelectSquare(row, col) {
-    if (symbol !== activePlayer || gameBoard[row][col] || winner || hasDraw) return;
+    if (symbol !== activePlayer || gameBoard[row][col] || winner || hasDraw)
+      return;
 
     const turn = { player: symbol, square: { row, col } };
 
@@ -145,10 +157,20 @@ export default function OnlineMultiplayer() {
     socket.emit("playerNameChange", { roomId, player: symbol, newName });
   }
 
+  if (!joined) {
+    return (
+      <div className="home-container">
+        <h1>Name: {gametag}</h1>
+        <h2>Room ID: {roomId}</h2>
+        <p className="waiting-message">{message || "Setting up the game..."}</p>
+      </div>
+    );
+  }
+
   return (
     <div id="game-container">
       <h2>Room ID: {roomId}</h2>
-      <p>You are: {symbol}</p>
+      <p>You are: {gametag} ({symbol})</p>
       <p>{message}</p>
 
       <ol id="players" className="highlight-player">

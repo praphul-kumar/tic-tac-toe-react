@@ -401,3 +401,60 @@ ol {
 .game-link:hover {
   background-color: #f8c031;
 }
+
+/* Start Screen */
+/* Centering the Home screen */
+.home-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 80px;
+  gap: 20px;
+}
+
+/* Input fields */
+input[type="text"] {
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 16px;
+  width: 250px;
+}
+
+/* Button styles */
+button {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+.btn-create {
+  background-color: #4caf50;
+  color: white;
+}
+
+.btn-join {
+  background-color: #2196f3;
+  color: white;
+}
+
+/* Button + Input row */
+.input-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+/* Waiting Message */
+.waiting-message {
+  margin-top: 30px;
+  font-size: 18px;
+  color: #555;
+}
