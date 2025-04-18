@@ -47,7 +47,7 @@ export default function LocalMultiplayer() {
   }
 
   return (
-    <main>
+    <>
       <div id="game-container">
         {/* Players */}
         <ol id="players" className="highlight-player">
@@ -74,6 +74,6 @@ export default function LocalMultiplayer() {
 
       {/* Game Logs */}
       <Log turns={gameTurns} />
-    </main>
+    </>
   );
 }

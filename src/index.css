@@ -349,3 +349,55 @@ ol {
     transform: scale(1);
   }
 }
+
+/* Home Page */
+.game-catogries {
+  width: 80%;
+  min-height: 100px;
+  margin-inline: auto;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2rem;
+}
+
+.game-item {
+  width: 25%;
+  min-height: 100px;
+  background: white;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+  text-align: center;
+}
+
+.game-icon-wrap {
+  font-size: 4rem;
+  text-align: center;
+  color: #f8c031;
+}
+
+.game-item-title {
+  line-height: 1;
+  margin-block: 0;
+  margin-bottom: 1rem;
+  color: #f8c031;
+}
+
+.game-link {
+  display: block;
+  width: 100%;
+  padding: .5rem 2rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  text-decoration: none;
+  color: black;
+  background-color: #f6e35a;
+  border-radius: .5rem;
+  transition: .3s all ease-in-out;
+}
+
+.game-link:hover {
+  background-color: #f8c031;
+}
