@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { io } from "socket.io-client";
 import GameBoard from "../components/GameBoard";
 import Player from "../components/Player";
@@ -13,16 +13,25 @@ const socket = io("http://localhost:3000");
 
 export default function OnlineMultiplayer() {
   const [players, setPlayers] = useState(LOCAL_PLAYERS);
+  const [winner, setWinner] = useState(null);
   const [symbol, setSymbol] = useState("");
   const [gameTurns, setGameTurns] = useState([]);
   const [roomId, setRoomId] = useState("");
   const [joined, setJoined] = useState(false);
   const [message, setMessage] = useState("");
+  const symbolRef = useRef(symbol);
+
+  useEffect(() => {
+    symbolRef.current = symbol;
+  }, [symbol]);
 
   const activePlayer = deriveActivePlayer(gameTurns);
   const gameBoard = deriveGameBoard(gameTurns);
-  const winner = deriveWinner(players, gameBoard);
-  const hasDraw = gameTurns.length === 9 && !winner;
+  const derivedWinner = deriveWinner(players, gameBoard);
+  const finalWinner = winner || derivedWinner;
+
+  console.log(`Winner: ${finalWinner}`);
+  const hasDraw = gameTurns.length === 9 && !finalWinner;
 
   useEffect(() => {
     // Create or join room
@@ -71,7 +80,22 @@ export default function OnlineMultiplayer() {
 
     // Restart Game
     socket.on("restartGame", () => {
+      console.log('Setting winner to null');
+      setWinner(null);
       setGameTurns([]);
+    });
+
+    socket.on("opponentLeft", () => {
+      setMessage("Opponent left the game.");
+      // Declare current player as winner
+      // setGameTurns([]); // Optional: reset board
+      console.log(`Player: ${players[symbolRef.current]}`);
+      setWinner(players[symbolRef.current]);
+
+      if (symbolRef.current == 'O') {
+        console.log('CHanging the Host Player...');
+        setSymbol('X');
+      }
     });
 
     return () => {
@@ -102,7 +126,7 @@ export default function OnlineMultiplayer() {
   function handleRestart() {
     // alert("Restart not supported in this demo yet!");
     // You could emit a restart event and reset state.
-
+    setWinner(null);
     setGameTurns([]);
 
     // Notify opponent
@@ -142,8 +166,8 @@ export default function OnlineMultiplayer() {
         />
       </ol>
 
-      {(winner || hasDraw) && (
-        <GameOver winner={winner} handleRestart={handleRestart} />
+      {(finalWinner || hasDraw) && (
+        <GameOver winner={finalWinner} handleRestart={handleRestart} />
       )}
 
       <GameBoard board={gameBoard} onSelectSquare={handleSelectSquare} />

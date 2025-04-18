@@ -61,14 +61,22 @@ io.on('connection', (socket) => {
     socket.to(roomId).emit('restartGame');
   });
 
-  // Handle player disconnect
-  socket.on('disconnect', () => {
-    console.log('User disconnected:', socket.id);
-    // Optional: Clean up rooms if needed
+  socket.on("disconnect", () => {
+    console.log("User disconnected:", socket.id);
     for (const roomId in rooms) {
-      rooms[roomId] = rooms[roomId].filter(id => id !== socket.id);
-      if (rooms[roomId].length === 0) {
-        delete rooms[roomId];
+      const playerIndex = rooms[roomId].indexOf(socket.id);
+      if (playerIndex !== -1) {
+        rooms[roomId].splice(playerIndex, 1);
+
+        // Notify opponent
+        socket.to(roomId).emit("opponentLeft");
+
+        // Clean up room if empty
+        if (rooms[roomId].length === 0) {
+          delete rooms[roomId];
+        }
+
+        break;
       }
     }
   });
